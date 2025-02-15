@@ -2,6 +2,8 @@ from textnode import TextNode, TextType
 
 from htmlnode import LeafNode
 
+import re
+
 def text_node_to_html_node(text_node):
     match text_node.text_type:
         case TextType.TEXT:
@@ -33,4 +35,44 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                     new_nodes.append(TextNode(text, TextType.TEXT))
         else:
             new_nodes.append(node)
+    return new_nodes
+
+def extract_markdown_images(text):
+    return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+
+def extract_markdown_links(text):
+    return re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+
+def split_nodes_image(old_nodes):
+    new_nodes = []
+    for node in old_nodes:
+        text_list = [node.text]
+        images = extract_markdown_images(node.text)
+        print(text_list)
+        for image in images:
+            alt, link = image
+            text_list = text_list[-1].split(f"![{alt}]({link})", 1)
+            print(image)
+            print(text_list)
+            if len(text_list[-2]) != 0:
+                new_nodes.append(TextNode(text_list[-2], TextType.TEXT))
+            new_nodes.append(TextNode(alt, TextType.IMAGE, link))
+        if len(text_list[-1]) != 0:
+            new_nodes.append(TextNode(text_list[-1], TextType.TEXT))
+    return new_nodes
+        
+
+def split_nodes_link(old_nodes):
+    new_nodes = []
+    for node in old_nodes:
+        text_list = [node.text]
+        links = extract_markdown_links(node.text)
+        for link in links:
+            alt, link = link
+            text_list = text_list[-1].split(f"[{alt}]({link})", 1)
+            if len(text_list[-2]) != 0:
+                new_nodes.append(TextNode(text_list[-2], TextType.TEXT))
+            new_nodes.append(TextNode(alt, TextType.LINK, link))
+        if len(text_list[-1]) != 0:
+            new_nodes.append(TextNode(text_list[-1], TextType.TEXT))
     return new_nodes

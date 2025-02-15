@@ -42,3 +42,57 @@ class Test_split_nodes_delimiter(unittest.TestCase):
         answer_key = zip(test_inputs, correct_outputs)
         for key in answer_key:
             self.assertEqual(split_nodes_delimiter(*key[0]), key[1])
+
+class Test_markdown_extractions(unittest.TestCase):
+    def test(self):
+        image_test_key = {
+            "this is an image ![text](link)" : [("text", "link")],
+            "and this has two images ![text](link) ![more text](more link)" : [("text", "link"), ("more text", "more link")]
+        }
+
+        link_test_key = {
+            "this is a link [text](link)" : [("text", "link")],
+            "and this has two links [text](link) [more text](more link)" : [("text", "link"), ("more text", "more link")]
+        }
+
+        for test in image_test_key:
+            self.assertEqual(extract_markdown_images(test), image_test_key[test])
+
+        for test in link_test_key:
+            self.assertEqual(extract_markdown_links(test), link_test_key[test])
+
+class Test_split_node_functions(unittest.TestCase):
+    def test(self):
+        text_node_images = TextNode(
+            "This is text with an image ![to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)",
+            TextType.TEXT,
+            )
+        
+        text_node_links = TextNode(
+            "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
+            TextType.TEXT,
+            )
+
+        image_test_key = [([text_node_images],
+            [
+            TextNode("This is text with an image ", TextType.TEXT),
+            TextNode("to boot dev", TextType.IMAGE, "https://www.boot.dev"),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("to youtube", TextType.IMAGE, "https://www.youtube.com/@bootdotdev")
+            ]
+        )]
+
+        link_test_key = [([text_node_links],
+            [
+            TextNode("This is text with a link ", TextType.TEXT),
+            TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev")
+            ]
+        )]
+
+        for test in image_test_key:
+            self.assertEqual(split_nodes_image(test[0]), test[1])
+
+        for test in link_test_key:
+            self.assertEqual(split_nodes_link(test[0]), test[1])
