@@ -35,8 +35,8 @@ class Test_split_nodes_delimiter(unittest.TestCase):
         ]
 
         correct_outputs = [
-            [TextNode("", TextType.TEXT), TextNode("hello", TextType.BOLD), TextNode(" world", TextType.TEXT), TextNode("hello world", TextType.BOLD)],
-            [TextNode("", TextType.TEXT), TextNode("hello world", TextType.BOLD), TextNode("", TextType.TEXT)],
+            [TextNode("hello", TextType.BOLD), TextNode(" world", TextType.TEXT), TextNode("hello world", TextType.BOLD)],
+            [TextNode("hello world", TextType.BOLD)],
         ]
 
         answer_key = zip(test_inputs, correct_outputs)
@@ -96,3 +96,25 @@ class Test_split_node_functions(unittest.TestCase):
 
         for test in link_test_key:
             self.assertEqual(split_nodes_link(test[0]), test[1])
+
+
+class Test_text_to_textnodes(unittest.TestCase):
+    def test(self):
+        key = [(
+            "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)",
+            [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+            ]
+        )]
+
+        for test in key:
+            self.assertEqual(text_to_textnodes(test[0]), test[1])
