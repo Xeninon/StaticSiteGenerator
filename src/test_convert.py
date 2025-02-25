@@ -26,7 +26,6 @@ class Test_text_node_to_html_node(unittest.TestCase):
         for key in answer_key:
             self.assertEqual(text_node_to_html_node(key[0]).__repr__(), key[1].__repr__())
 
-
 class Test_split_nodes_delimiter(unittest.TestCase):
     def test(self):
         test_inputs = [
@@ -97,7 +96,6 @@ class Test_split_node_functions(unittest.TestCase):
         for test in link_test_key:
             self.assertEqual(split_nodes_link(test[0]), test[1])
 
-
 class Test_text_to_textnodes(unittest.TestCase):
     def test(self):
         key = [(
@@ -118,3 +116,34 @@ class Test_text_to_textnodes(unittest.TestCase):
 
         for test in key:
             self.assertEqual(text_to_textnodes(test[0]), test[1])
+
+class Test_markdown_to_blocks(unittest.TestCase):
+    def test(self):
+        key = [(
+            "# This is a heading\n\n\n\nThis is a paragraph of text. It has some **bold** and *italic* words inside of it. \n\n* This is the first list item in a list block\n* This is a list item\n* This is another list item",
+            [
+            "# This is a heading",
+            "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
+            "* This is the first list item in a list block\n* This is a list item\n* This is another list item"
+            ]
+        )]
+
+        for test in key:
+            self.assertEqual(markdown_to_blocks(test[0]), test[1])
+
+class Test_block_to_blocktype(unittest.TestCase):
+    def test(self):
+        key = [("paragrapgh", BlockType.PARAGRAPH),
+               ("###### heading", BlockType.HEADING),
+               ("```code```", BlockType.CODE),
+               (">quote\n>block", BlockType.QUOTE),
+               ("* unordered\n* list", BlockType.UNORDERED_LIST),
+               ("1. ordered\n2. list", BlockType.ORDERED_LIST)]
+
+        for test in key:
+            self.assertEqual(block_to_blocktype(test[0]), test[1])
+
+
+
+if __name__ == "__main__":
+    unittest.main()
