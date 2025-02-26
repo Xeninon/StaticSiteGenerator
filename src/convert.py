@@ -1,6 +1,6 @@
 from textnode import TextNode, TextType
 
-from htmlnode import LeafNode
+from htmlnode import *
 
 import re
 
@@ -86,6 +86,7 @@ def text_to_textnodes(text):
     nodes = [TextNode(text, TextType.TEXT)]
     nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
     nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
     nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
     nodes = split_nodes_image(nodes)
     nodes = split_nodes_link(nodes)
@@ -132,3 +133,77 @@ def block_to_blocktype(block):
     if olist:
         return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
+
+def text_to_children(blocktype, block):
+    text = remove_block_syntax(blocktype, block)
+    oneline = text.replace("\n", " ")
+    if blocktype == BlockType.ORDERED_LIST or blocktype == BlockType.UNORDERED_LIST:
+        children = []
+        lines = text.split("\n")
+        for line in lines:
+            listnode = ParentNode("li", text_to_children_helper(line))
+            children.append(listnode)
+        return children
+    elif blocktype == BlockType.CODE:
+        return [LeafNode("code", oneline)]
+    else:
+        return text_to_children_helper(oneline)
+
+def text_to_children_helper(text):
+    children = []
+    textnodes = text_to_textnodes(text)
+    for textnode in textnodes:
+        children.append(text_node_to_html_node(textnode))
+    return children
+
+
+
+def remove_block_syntax(blocktype, block):
+    lines = block.split("\n")
+    match blocktype:
+        case BlockType.QUOTE:
+            for i in range(len(lines)):
+                lines[i] = lines[i][1:]
+            return "\n".join(lines)
+        case BlockType.UNORDERED_LIST:
+            for i in range(len(lines)):
+                lines[i] = lines[i][2:]
+            return "\n".join(lines)
+        case BlockType.ORDERED_LIST:
+            for i in range(len(lines)):
+                lines[i] = lines[i][3:]
+            return "\n".join(lines)
+        case BlockType.CODE:
+            return block[3:-3]
+        case BlockType.HEADING:
+            return block.lstrip("#")[1:]
+        case BlockType.PARAGRAPH:
+            return block
+        case _:
+            return block
+        
+def get_blocktag(blocktype, block):
+    match blocktype:
+        case BlockType.QUOTE:
+            return "blockquote"
+        case BlockType.UNORDERED_LIST:
+            return "ul"
+        case BlockType.ORDERED_LIST:
+            return "ol"
+        case BlockType.CODE:
+            return "pre"
+        case BlockType.HEADING:
+            for i in range(7):
+                if block[i] == " ":
+                    return f"h{i-1}"
+        case BlockType.PARAGRAPH:
+            return "p"
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    blocknodes = []
+    for block in blocks:
+        blocktype = block_to_blocktype(block)
+        blocknode = ParentNode(get_blocktag(blocktype, block), text_to_children(blocktype, block))
+        blocknodes.append(blocknode)
+    return ParentNode("div", blocknodes)

@@ -128,8 +128,28 @@ class Test_markdown_to_blocks(unittest.TestCase):
             ]
         )]
 
-        for test in key:
-            self.assertEqual(markdown_to_blocks(test[0]), test[1])
+        for test, answer in key:
+            self.assertEqual(markdown_to_blocks(test), answer)
+
+    def test_markdown_to_blocks(self):
+        md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+            "This is **bolded** paragraph",
+            "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+            "- This is a list\n- with items",
+        ],
+    )
 
 class Test_block_to_blocktype(unittest.TestCase):
     def test(self):
@@ -143,7 +163,48 @@ class Test_block_to_blocktype(unittest.TestCase):
         for test in key:
             self.assertEqual(block_to_blocktype(test[0]), test[1])
 
+class Test_markdown_to_html_node(unittest.TestCase):
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
 
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+    
+    def test_ordered_lists(self):
+        md = """
+1. I am **cool**
+2. I am **awesome**
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><ol><li>I am <b>cool</b></li><li>I am <b>awesome</b></li></ol></div>",
+        )
+    
+    def test__code(self):
+        md = """
+```<p>I'm in the club straight up blocking it</p>```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code><p>I'm in the club straight up blocking it</p></code></pre></div>",
+        )
 
 if __name__ == "__main__":
     unittest.main()
