@@ -145,7 +145,7 @@ def text_to_children(blocktype, block):
             children.append(listnode)
         return children
     elif blocktype == BlockType.CODE:
-        return [LeafNode("code", oneline)]
+        return [LeafNode("code", text)]
     else:
         return text_to_children_helper(oneline)
 
@@ -156,14 +156,12 @@ def text_to_children_helper(text):
         children.append(text_node_to_html_node(textnode))
     return children
 
-
-
 def remove_block_syntax(blocktype, block):
     lines = block.split("\n")
     match blocktype:
         case BlockType.QUOTE:
             for i in range(len(lines)):
-                lines[i] = lines[i][1:]
+                lines[i] = lines[i][2:]
             return "\n".join(lines)
         case BlockType.UNORDERED_LIST:
             for i in range(len(lines)):
@@ -174,7 +172,7 @@ def remove_block_syntax(blocktype, block):
                 lines[i] = lines[i][3:]
             return "\n".join(lines)
         case BlockType.CODE:
-            return block[3:-3]
+            return block[4:-3]
         case BlockType.HEADING:
             return block.lstrip("#")[1:]
         case BlockType.PARAGRAPH:
@@ -195,7 +193,7 @@ def get_blocktag(blocktype, block):
         case BlockType.HEADING:
             for i in range(7):
                 if block[i] == " ":
-                    return f"h{i-1}"
+                    return f"h{i}"
         case BlockType.PARAGRAPH:
             return "p"
 
