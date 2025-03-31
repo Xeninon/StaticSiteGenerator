@@ -172,7 +172,7 @@ def remove_block_syntax(blocktype, block):
                 lines[i] = lines[i][3:]
             return "\n".join(lines)
         case BlockType.CODE:
-            return block.strip(" `")
+            return block.strip(" `\n")
         case BlockType.HEADING:
             return block.lstrip("#")[1:]
         case BlockType.PARAGRAPH:
