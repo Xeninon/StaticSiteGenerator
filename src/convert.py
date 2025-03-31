@@ -120,7 +120,7 @@ def block_to_blocktype(block):
     ulist = True
     olist = True
     for i in range(len(split_lines)):
-        if split_lines[i][0] != "> ":
+        if split_lines[i][0] != ">":
             quote = False
         if split_lines[i][:2] != "* " and split_lines[i][:2] != "- ":
             ulist = False
@@ -161,7 +161,7 @@ def remove_block_syntax(blocktype, block):
     match blocktype:
         case BlockType.QUOTE:
             for i in range(len(lines)):
-                lines[i] = lines[i][2:]
+                lines[i] = lines[i][1:].strip(" `")
             return "\n".join(lines)
         case BlockType.UNORDERED_LIST:
             for i in range(len(lines)):
@@ -172,7 +172,7 @@ def remove_block_syntax(blocktype, block):
                 lines[i] = lines[i][3:]
             return "\n".join(lines)
         case BlockType.CODE:
-            return block[4:-3]
+            return block.strip(" `")
         case BlockType.HEADING:
             return block.lstrip("#")[1:]
         case BlockType.PARAGRAPH:
