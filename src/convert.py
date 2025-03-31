@@ -120,7 +120,7 @@ def block_to_blocktype(block):
     ulist = True
     olist = True
     for i in range(len(split_lines)):
-        if split_lines[i][0] != ">":
+        if split_lines[i][0] != "> ":
             quote = False
         if split_lines[i][:2] != "* " and split_lines[i][:2] != "- ":
             ulist = False

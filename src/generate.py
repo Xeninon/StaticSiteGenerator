@@ -2,6 +2,8 @@ import os
 
 import shutil
 
+import pathlib
+
 from convert import markdown_to_html_node
 
 def copy_static_to_public(static, public):
@@ -42,3 +44,11 @@ def generate_page(from_path, template_path, dest_path):
     dest_f = open(dest_path, "w")
     dest_f.write(full_HTML)
     dest_f.close()
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    if os.path.isfile(dir_path_content):
+        generate_page(dir_path_content, template_path, dest_dir_path[:-2] + "html")
+        return
+    items = os.listdir(dir_path_content)
+    for item in items:
+        generate_pages_recursive(os.path.join(dir_path_content, item), template_path, os.path.join(dest_dir_path, item))
